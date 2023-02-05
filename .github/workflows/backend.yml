@@ -23,6 +23,9 @@ jobs:
       - run: npm run test -- --coverage
       - run: npm run build
 
+      - run: node backend/dist/index.js &
+      - run: npm run test:api
+
       - uses: actions/upload-artifact@v3
         if: always()
         with:
