@@ -1,9 +1,10 @@
 name: backend
 
 on:
-  push:
+  pull_request:
     branches:
       - main
+    types: [opened]
 
 defaults:
   run:
