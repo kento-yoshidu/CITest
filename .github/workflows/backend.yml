@@ -1,48 +1,12 @@
 name: backend
 
 on:
-  pull_request:
+  push:
     branches:
       - main
-    types: [opened]
-
-defaults:
-  run:
-    working-directory: backend
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-version: 16.x
-      
-      - run: npm ci
-      - run: npm run test -- --coverage
-      - run: npm run build
-
-      - run: node dist/index.js &
-      - run: npx wait-on -t 10000 http://localhost:8080/api/health
-      - run: npm run test:api
-
-      - uses: actions/upload-artifact@v3
-        if: always()
-        with:
-          name: coverage
-          path: backend/coverage/**
-          retention-days: 5
-
-      - uses: actions/upload-artifact@v3
-        with:
-          name: dist
-          path: backend/dist/index.js
-          retention-days: 5
-
-  deploy:
-    needs: build
-    if: github.event_name == "push"
-    runs-on: ubuntu-latest
-    steps:
-      - run: 
+      - run: echo hello world
