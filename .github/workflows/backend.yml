@@ -22,9 +22,12 @@ jobs:
       - run: npm run test -- --coverage
       - run: npm run build
 
+      - run: node dist/index.js &
+      - run: npm run test:api
+
       - uses: actions/upload-artifact@v3
         with:
-          name: covarage
+          name: coverage
           path: backend/coverage/**
           retention-days: 5
 
