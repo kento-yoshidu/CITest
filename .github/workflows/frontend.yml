@@ -16,5 +16,5 @@ jobs:
       - uses: actions/checkout@v3
       - run: aws s3 sync . s3://gatestkento --exact-timestamps --region ap-northeast-1
         env:
-          AWS_ACCESS_KEY_ID: ${{ FRONTEND_AWS_ACCESSKEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ FRONTEND_AWS_SCRET_KEY }}
+          AWS_ACCESS_KEY_ID: ${{secrets.FRONTEND_AWS_ACCESSKEY_ID}}
+          AWS_SECRET_ACCESS_KEY: ${{secrets.FRONTEND_AWS_SCRET_KEY}}
