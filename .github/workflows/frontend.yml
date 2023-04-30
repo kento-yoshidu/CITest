@@ -9,12 +9,19 @@ defaults:
   run:
     working-directory: frontend
 
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+
+      - uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: arn:aws:iam::603675346890:role/github_actions_deploy_role
+          aws-region: ap-northeast-1
+
       - run: aws s3 sync . s3://gatestkento --exact-timestamps --region ap-northeast-1
-        env:
-          AWS_ACCESS_KEY_ID: ${{secrets.FRONTEND_AWS_ACCESSKEY_ID}}
-          AWS_SECRET_ACCESS_KEY: ${{secrets.FRONTEND_AWS_SCRET_KEY}}
