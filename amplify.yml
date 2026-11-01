@@ -3,15 +3,17 @@ frontend:
   phases:
     preBuild:
       commands:
+        - nvm install 22
+        - npm install -g pnpm@10.23.0
+        - pnpm config set store-dir .pnpm-store
         - pnpm install
     build:
       commands:
         - pnpm run build
   artifacts:
-    baseDirectory: .next
+    baseDirectory: dist
     files:
       - '**/*'
   cache:
     paths:
-      - .next/cache/**/*
-      - node_modules/**/*
+      - .pnpm-store/**/*
