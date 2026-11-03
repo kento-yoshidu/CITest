@@ -1,6 +1,6 @@
-import "./App.css";
+import { createFileRoute, Link } from '@tanstack/react-router'
 import { useQuery } from "@tanstack/react-query";
-import { fetchClient } from "./lib/fetchClient";
+import { fetchClient } from '../lib/fetchClient';
 
 type Unit = {
   id: string;
@@ -8,7 +8,11 @@ type Unit = {
   description: string;
 };
 
-function App() {
+export const Route = createFileRoute('/')({
+  component: RouteComponent,
+})
+
+function RouteComponent() {
   const { data, isPending } = useQuery<Unit[]>({
     queryKey: ["units"],
     queryFn: () => fetchClient("/api/units"),
@@ -23,14 +27,12 @@ function App() {
       <section id="center">
         {data && data.map((d) => (
           <>
-            <p>{d.id}</p>
-            <p>{d.title}</p>
-            <p>{d.description}</p>
+            <Link to="/units/$unitId" params={{ unitId: d.id }}>
+              <p>{d.title}</p>
+            </Link>
           </>
         ))}
       </section>
     </>
   );
 }
-
-export default App;
