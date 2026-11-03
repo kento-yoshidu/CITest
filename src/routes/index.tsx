@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { useQuery } from "@tanstack/react-query";
+import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { fetchClient } from '../lib/fetchClient';
 
 type Unit = {
@@ -8,24 +8,23 @@ type Unit = {
   description: string;
 };
 
+const unitsQueryOptions = queryOptions({
+  queryKey: ["units"],
+  queryFn: () => fetchClient<Unit[]>("/api/units"),
+});
+
 export const Route = createFileRoute('/')({
+  loader: ({ context }) => context.queryClient.ensureQueryData(unitsQueryOptions),
   component: RouteComponent,
 })
 
 function RouteComponent() {
-  const { data, isPending } = useQuery<Unit[]>({
-    queryKey: ["units"],
-    queryFn: () => fetchClient("/api/units"),
-  });
-
-  if (isPending) {
-    return <p>Loading...</p>;
-  }
+  const { data } = useSuspenseQuery(unitsQueryOptions);
 
   return (
     <>
       <section id="center">
-        {data && data.map((d) => (
+        {data.map((d) => (
           <>
             <Link to="/units/$unitId" params={{ unitId: d.id }}>
               <p>{d.title}</p>
