@@ -15,6 +15,12 @@ const unitsQueryOptions = queryOptions({
 
 export const Route = createFileRoute('/')({
   loader: ({ context }) => context.queryClient.ensureQueryData(unitsQueryOptions),
+  pendingComponent: () => (
+    <>
+      <p>Loading...</p>
+      <p>サーバーを起動しています（1分ほどかかるかもしれません🙇‍♂️）</p>
+    </>
+  ),
   component: RouteComponent,
 })
 
