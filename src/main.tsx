@@ -10,6 +10,9 @@ const queryClient = new QueryClient();
 const router = createRouter({
   routeTree,
   context: { queryClient },
+  defaultPendingComponent: () => <p>Loading...</p>,
+  defaultPendingMs: 0,
+  defaultPendingMinMs: 0,
 });
 
 declare module "@tanstack/react-router" {
