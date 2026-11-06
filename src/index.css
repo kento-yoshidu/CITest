@@ -1,81 +1,94 @@
 :root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+  /* 黒板（緑） */
+  --board: #1f3a2e;
+  --board-light: #264536; /* カード・ホバー時の少し明るい面 */
+  --chalk: #ecebe4; /* 本文 */
+  --chalk-strong: #fbfaf3; /* 見出し */
+  --chalk-dim: #a9b3ab; /* 補足・過去の設問 */
+  --chalk-yellow: #f2d675; /* アクセント */
+  --chalk-red: #f08a80; /* 不正解 */
+  --chalk-blue: #8cc8e8; /* 正解・リンク */
+  --line: rgba(236, 235, 228, 0.22);
 
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
+  --sans: "Noto Sans JP Variable", "Hiragino Sans", "Yu Gothic UI", Meiryo, system-ui, sans-serif;
   --mono: ui-monospace, Consolas, monospace;
 
-  font: 18px/145% var(--sans);
-  letter-spacing: 0.18px;
-  color-scheme: light dark;
-  color: var(--text);
-  background: var(--bg);
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
+  color-scheme: dark;
+  font: 17px/1.8 var(--sans);
+  color: var(--chalk);
+  background-color: var(--board);
+  /* チョーク跡っぽい、ごく薄いムラ */
+  background-image:
+    radial-gradient(ellipse at 20% 10%, rgba(255, 255, 255, 0.04), transparent 60%),
+    radial-gradient(ellipse at 80% 90%, rgba(255, 255, 255, 0.03), transparent 55%);
+  background-attachment: fixed;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
-  @media (max-width: 1024px) {
+
+  @media (max-width: 640px) {
     font-size: 16px;
   }
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
-  }
-}
-
-#root {
-  width: 720;
-  max-width: 100%;
-  margin: 0 auto;
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
-  padding: 24px;
 }
 
 body {
   margin: 0;
 }
 
+#root {
+  width: 100%;
+  max-width: 720px;
+  margin: 0 auto;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  padding: 32px 20px;
+}
+
 h1,
-h2 {
-  font-family: var(--heading);
-  font-weight: 500;
-  color: var(--text-h);
+h2,
+h3 {
+  color: var(--chalk-strong);
+  font-weight: 700;
+  line-height: 1.4;
+  margin: 0 0 12px;
+}
+
+h1 {
+  font-size: 28px;
 }
 
 h2 {
-  font-size: 24px;
-  line-height: 118%;
-  letter-spacing: -0.24px;
-  margin: 0 0 8px;
-  @media (max-width: 1024px) {
-    font-size: 20px;
-  }
+  font-size: 22px;
 }
 
 p {
   margin: 0;
+}
+
+a {
+  color: var(--chalk-strong);
+  text-decoration-color: var(--line); /* 下線は控えめに */
+  text-underline-offset: 3px;
+  transition: color 0.15s, text-decoration-color 0.15s;
+
+  &:hover {
+    color: var(--chalk-yellow);
+    text-decoration-color: currentColor;
+  }
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--chalk-yellow);
+  outline-offset: 2px;
+}
+
+::selection {
+  background: rgba(242, 214, 117, 0.35);
 }
