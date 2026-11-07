@@ -2,6 +2,7 @@ import { queryOptions, useMutation, useSuspenseQuery } from '@tanstack/react-que
 import { createFileRoute } from '@tanstack/react-router'
 import { fetchClient } from '../../lib/fetchClient';
 import styles from "./-unitId.module.css";
+import { useState } from 'react';
 
 type Choice = {
   id: string;
@@ -19,6 +20,11 @@ type AnswerResponse = {
   correct: boolean;
   next_question: Question | null;
   unit_completed: boolean;
+};
+
+type AnswerResult = {
+  choiceId: string;
+  correct: boolean;
 };
 
 export const Route = createFileRoute('/units/$unitId')({
@@ -45,31 +51,53 @@ function RouteComponent() {
 
   const { data } = useSuspenseQuery(startQueryOptions(unitId));
 
+  const [questions, setQuestions] = useState<Question[]>([data]);
+  const [results, setResults] = useState<Record<string, AnswerResult>>({});
+
+  const current = questions[questions.length - 1];
+
   const answer = useMutation({
-    mutationFn: (choiceId: string) => postAnswer(data.id, choiceId),
+    mutationFn: (choiceId: string) => postAnswer(current.id, choiceId),
+    onSuccess: (res, choiceId) => {
+      setResults((prev) => ({
+        ...prev,
+        [current.id]: {
+          choiceId,
+          correct: res.correct,
+        }
+      }));
+
+      if (res.next_question) {
+        setQuestions((prev) => [...prev, res.next_question!]);
+      }
+    }
   });
 
   return (
     <>
-      <h2>{data.body}</h2>
+      {questions.map((q) => (
+        <section key={q.id}>
+          <h2>{q.body}</h2>
+          <div className={styles.choices}>
+            {q.choices.map((choice) => (
+              <button
+                key={choice.id}
+                type="button"
+                className={styles.choice}
+                disabled={q.id !== current.id}
+                onClick={() => answer.mutate(choice.id)}
+              >
+                <span>{choice.label}</span>
+                <span>{choice.body}</span>
+              </button>
+            ))}
+          </div>
 
-      <div className={styles.choices}>
-        {data.choices.map((choice) => (
-          <button
-            key={choice.id}
-            type="button"
-            className={styles.choice}
-            onClick={() => answer.mutate(choice.id)}
-          >
-            <span>{choice.label}</span>
-            <span>{choice.body}</span>
-          </button>
-        ))}
-
-        {answer.data && (
-          <p>{answer.data.correct ? "正解" : "不正解" }</p>
-        )}
-      </div>
+          {results[q.id] && (
+            <p>{results[q.id].correct ? "正解" : "不正解"}</p>
+          )}
+        </section>
+      ))}
     </>
   );
 }
