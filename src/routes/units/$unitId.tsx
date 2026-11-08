@@ -13,12 +13,14 @@ type Choice = {
 type Question = {
   id: string;
   body: string;
+  is_branch: boolean;
   choices: Choice[];
 };
 
 type AnswerResponse = {
   correct: boolean;
   next_question: Question | null;
+  branch_question: Question | null;
   unit_completed: boolean;
 };
 
@@ -26,6 +28,8 @@ type AnswerResult = {
   choiceId: string;
   correct: boolean;
 };
+
+type AnswerVars = { questionId: string; choiceId: string; parentId?: string }; // 補足の問題なら parentId を付ける
 
 export const Route = createFileRoute('/units/$unitId')({
   loader: ({ context, params }) =>
@@ -51,31 +55,50 @@ function RouteComponent() {
 
   const { data } = useSuspenseQuery(startQueryOptions(unitId));
 
-  const [questions, setQuestions] = useState<Question[]>([data]);
+  const [mainQuestions, setMainQuestions] = useState<Question[]>([data]);
+  const [branches, setBranches] = useState<Record<string, Question[]>>({});
   const [results, setResults] = useState<Record<string, AnswerResult>>({});
 
-  const current = questions[questions.length - 1];
-
   const answer = useMutation({
-    mutationFn: (choiceId: string) => postAnswer(current.id, choiceId),
-    onSuccess: (res, choiceId) => {
+    mutationFn: ({ questionId, choiceId }: AnswerVars) => postAnswer(questionId, choiceId),
+    onSuccess: (res, { questionId, choiceId, parentId }) => {
       setResults((prev) => ({
         ...prev,
-        [current.id]: {
+        [questionId]: {
           choiceId,
           correct: res.correct,
         }
       }));
 
-      if (res.next_question) {
-        setQuestions((prev) => [...prev, res.next_question!]);
+      if (!res.correct) {
+        return;
+      }
+
+      if (parentId) {
+        if (res.next_question) {
+          setBranches((prev) => ({
+            ...prev,
+            [parentId]: [...(prev[parentId] ?? []), res.next_question!],
+          }));
+        }
+      } else {
+        if (res.next_question) {
+          setMainQuestions((prev) => [...prev, res.next_question!]);
+        }
+
+        if (res.branch_question) {
+          setBranches((prev) => ({
+            ...prev,
+            [questionId]: [res.branch_question!],
+          }));
+        }
       }
     }
   });
 
   return (
     <>
-      {questions.map((q) => (
+      {mainQuestions.map((q) => (
         <section key={q.id}>
           <h2>{q.body}</h2>
           <div className={styles.choices}>
@@ -84,8 +107,8 @@ function RouteComponent() {
                 key={choice.id}
                 type="button"
                 className={styles.choice}
-                disabled={q.id !== current.id}
-                onClick={() => answer.mutate(choice.id)}
+                disabled={results[q.id]?.correct}
+                onClick={() => answer.mutate({ questionId: q.id, choiceId: choice.id })}
               >
                 <span>{choice.label}</span>
                 <span>{choice.body}</span>
