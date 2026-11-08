@@ -2,7 +2,7 @@ import { queryOptions, useMutation, useSuspenseQuery } from '@tanstack/react-que
 import { createFileRoute } from '@tanstack/react-router'
 import { fetchClient } from '../../lib/fetchClient';
 import styles from "./-unitId.module.css";
-import { useState } from 'react';
+import { Fragment, useState } from 'react';
 
 type Choice = {
   id: string;
@@ -96,31 +96,73 @@ function RouteComponent() {
     }
   });
 
-  return (
-    <>
-      {mainQuestions.map((q) => (
-        <section key={q.id}>
-          <h2>{q.body}</h2>
-          <div className={styles.choices}>
-            {q.choices.map((choice) => (
-              <button
-                key={choice.id}
-                type="button"
-                className={styles.choice}
-                disabled={results[q.id]?.correct}
-                onClick={() => answer.mutate({ questionId: q.id, choiceId: choice.id })}
-              >
-                <span>{choice.label}</span>
-                <span>{choice.body}</span>
-              </button>
-            ))}
-          </div>
+  const renderQuestion = (q: Question, parentId?: string) => (
+    <section key={q.id}>
+      <h2>{q.body}</h2>
 
-          {results[q.id] && (
-            <p>{results[q.id].correct ? "正解" : "不正解"}</p>
-          )}
-        </section>
+      <div className={styles.choices}>
+        {q.choices.map((choice) => (
+          <button
+            key={choice.id}
+            type="button"
+            className={styles.choice}
+            disabled={results[q.id]?.correct}
+            onClick={() => answer.mutate({
+              questionId: q.id,
+              choiceId: choice.id,
+              parentId,
+            })}
+          >
+            <span>{choice.label}</span>
+            <span>{choice.body}</span>
+          </button>
+        ))}
+      </div>
+
+      {results[q.id] && (
+        <p>{results[q.id].correct ? "正解" : "不正解"}</p>
+      )}
+    </section>
+  );
+
+  const renderBranch = (parentId: string) => {
+    const list = branches[parentId];
+
+    if (!list) {
+      return null;
+    }
+
+    const last = list[list.length - 1];
+    const ended = results[last.id]?.correct === true;
+
+    return (
+      <aside className={styles.branch}>
+        <p className={styles.branchLabel}>補足</p>
+        {list.map((q) => renderQuestion(q, parentId))}
+        {ended && <p className={styles.branchLabel}>補足おわり</p>}
+      </aside>
+    )
+  }
+  const lastMain = mainQuestions[mainQuestions.length - 1];
+  const unitCompleted = results[lastMain.id]?.correct === true;
+
+  return (
+    <div className={styles.flow}>
+      {mainQuestions.map((q, i) => (
+        <Fragment key={q.id}>
+          <div>{renderQuestion(q)}</div>
+          <div className={styles.side}>
+            {i > 0 && renderBranch(mainQuestions[i - 1].id)}
+          </div>
+        </Fragment>
       ))}
-    </>
+
+      {unitCompleted && (
+        <>
+          <div><p>完了</p></div>
+          <div className={styles.side}>{renderBranch(lastMain.id)}</div>
+        </>
+      )}
+    </div>
   );
 }
