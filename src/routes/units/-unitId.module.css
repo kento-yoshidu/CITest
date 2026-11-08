@@ -16,3 +16,33 @@
   text-align: left;
   cursor: pointer;
 }
+
+.flow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px 32px;
+  align-items: start;
+}
+
+.branch {
+  border-left: 2px dashed var(--chalk-dim);
+  padding-left: 16px;
+}
+
+.branchLabel {
+  color: var(--chalk-dim);
+}
+
+@media (max-width: 640px) {
+  .flow {
+    grid-template-columns: 1fr;
+  }
+
+  .side:empty {
+    display: none;
+  }
+
+  .branch {
+    margin-left: 16px;
+  }
+}
